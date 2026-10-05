@@ -93,8 +93,56 @@ ENABLE_FILE_LOGGING=false
 - 查看指派統計
 - 列出專案中的使用者
 - 建立 issue
-- 更新 issue（含加入 / 移出 target version / roadmap：`versionId` + `versionAction`）
+- 更新 issue（含加入 / 移出 target version / roadmap：`versionId` + `versionAction`；自訂欄位：`customFields`）
+- 建立 / 更新 issue 時寫入任意自訂欄位（以 `fieldName` 或 `fieldId` + `value`）
 - 新增 issue note
+
+## 更新自訂欄位 395（MCP Tool）
+
+`update_issue` 與 `create_issue` 同時接受 `customFields` 與 `custom_fields`（兩者等價，可擇一）。若兩個都傳，會合併後一併寫入。
+
+每一筆可用 MCP 形狀或 Mantis REST 形狀：
+
+| 形狀 | 範例 |
+|------|------|
+| MCP | `{ "fieldId": 395, "fieldName": "MCP Tool", "value": "render_image" }` |
+| REST | `{ "field": { "id": 395, "name": "MCP Tool" }, "value": "render_image" }` |
+
+欄位 395 的顯示名稱是 `MCP Tool`。每一筆至少要有 `value`，再加上 id 或名稱（`fieldId`/`fieldName`，或 REST 的 `field.id`/`field.name`）。
+
+把 bug 100413 的 MCP Tool 設成 `render_image`：
+
+```json
+{
+  "issueId": 100413,
+  "customFields": [
+    { "fieldId": 395, "fieldName": "MCP Tool", "value": "render_image" }
+  ]
+}
+```
+
+`custom_fields` 鍵與 REST 形狀也可以：
+
+```json
+{
+  "issueId": 100413,
+  "custom_fields": [
+    { "field": { "id": 395 }, "value": "render_image" }
+  ]
+}
+```
+
+只給 id 或只給名稱也可以：
+
+```json
+{ "issueId": 100413, "customFields": [{ "fieldId": 395, "value": "render_image" }] }
+```
+
+```json
+{ "issueId": 100413, "customFields": [{ "fieldName": "MCP Tool", "value": "render_image" }] }
+```
+
+寫完後用 `get_issue_by_id` 讀回該 issue，確認 `custom_fields` 裡 id 395 的 `value` 已是新值。
 
 ## 本機開發
 
